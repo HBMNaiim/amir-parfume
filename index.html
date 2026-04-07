@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Amir Parfume — عطور فاخرة | Parfums Émiratis en Algérie</title>
+  <meta name="description"
+    content="Découvrez la collection exclusive de parfums Amir Parfume. Parfums émiratis authentiques (Latafa, Ard Al Zaafaran...) livrés partout en Algérie. Paiement à la livraison.">
+  <!-- Open Graph / Social -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Amir Parfume — عطور فاخرة">
+  <meta property="og:description"
+    content="Parfums émiratis authentiques livrés partout en Algérie. Paiement à la livraison.">
+  <meta property="og:image" content="images/hero.png">
+  <meta property="og:site_name" content="Amir Parfume">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Amir Parfume — عطور فاخرة">
+  <meta name="twitter:description" content="Parfums émiratis authentiques livrés partout en Algérie.">
+  <meta name="twitter:image" content="images/hero.png">
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- html2pdf for order PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body>
+
+  <!-- ======================================================== -->
+  <!-- PAGE LOADER -->
+  <!-- ======================================================== -->
+  <div id="page-loader" role="status" aria-label="Chargement">
+    <div class="loader-logo">Amir Parfume</div>
+    <div class="loader-bar"></div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- SCROLL PROGRESS BAR -->
+  <!-- ======================================================== -->
+  <div id="scroll-progress" aria-hidden="true"></div>
+
+  <!-- ======================================================== -->
+  <!-- NAVBAR -->
+  <!-- ======================================================== -->
+  <nav id="navbar" role="navigation" aria-label="Navigation principale">
+    <a href="#hero" class="nav-logo" aria-label="Amir Parfume - Accueil">
+      <span class="nav-logo-name">Amir Parfume</span>
+      <span class="nav-logo-sub">امير للعطور</span>
+    </a>
+
+    <ul class="nav-links" role="list">
+      <li><a href="#hero" class="active">Accueil</a></li>
+      <li><a href="#catalog">Catalogue</a></li>
+      <li><a href="#catalog" data-filter="homme">Homme</a></li>
+      <li><a href="#catalog" data-filter="femme">Femme</a></li>
+      <li><a href="#catalog" data-filter="promo">Promos</a></li>
+      <li><a href="#footer">Contact</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <button class="nav-icon-btn" id="theme-toggle" title="Changer le thème"
+        aria-label="Basculer le thème clair/sombre">
+        <i class="fas fa-moon" aria-hidden="true"></i>
+      </button>
+      <button class="nav-icon-btn" id="search-nav-btn" title="Rechercher" aria-label="Aller à la recherche">
+        <i class="fas fa-search" aria-hidden="true"></i>
+      </button>
+      <button class="nav-icon-btn" id="cart-btn" title="Panier" aria-label="Ouvrir mon panier">
+        <i class="fas fa-shopping-bag" aria-hidden="true"></i>
+        <span class="cart-badge" id="cart-badge" aria-live="polite">0</span>
+      </button>
+      <button class="hamburger" id="hamburger-btn" aria-label="Ouvrir le menu" aria-expanded="false"
+        aria-controls="mobile-menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" role="dialog" aria-label="Menu mobile">
+    <ul role="list">
+      <li><a href="#hero"><i class="fas fa-home" aria-hidden="true"></i> Accueil</a></li>
+      <li><a href="#catalog"><i class="fas fa-th-large" aria-hidden="true"></i> Catalogue</a></li>
+      <li><a href="#catalog" data-filter="homme"><i class="fas fa-mars" aria-hidden="true"></i> Homme</a></li>
+      <li><a href="#catalog" data-filter="femme"><i class="fas fa-venus" aria-hidden="true"></i> Femme</a></li>
+      <li><a href="#catalog" data-filter="unisexe"><i class="fas fa-transgender-alt" aria-hidden="true"></i> Unisexe</a>
+      </li>
+      <li><a href="#catalog" data-filter="promo"><i class="fas fa-tag" aria-hidden="true"></i> Promotions</a></li>
+    </ul>
+  </div>
+  <div id="mobile-menu-overlay" aria-hidden="true"></div>
+
+  <!-- ======================================================== -->
+  <!-- HERO -->
+  <!-- ======================================================== -->
+  <section id="hero" aria-label="Accueil">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="hero-overlay" aria-hidden="true"></div>
+    <div class="hero-content">
+      <span class="hero-label">✦ Parfums Émiratis Authentiques</span>
+      <h1 class="hero-title">
+        امير للعطور<br>
+        <em>Amir Parfume</em>
+      </h1>
+      <p class="hero-desc">
+        Latafa · Ard Al Zaafaran · Fragrance World — Des parfums arabes d'exception à des prix accessibles, livrés
+        partout en Algérie.
+      </p>
+      <div class="hero-actions">
+        <a href="#catalog" class="btn btn-gold">
+          <i class="fas fa-gem" aria-hidden="true"></i> Explorer la Collection
+        </a>
+        <a href="#catalog" class="btn btn-outline" data-filter="promo">
+          <i class="fas fa-tag" aria-hidden="true"></i> Voir les Promos
+        </a>
+      </div>
+    </div>
+
+    <div class="hero-stats" aria-label="Statistiques">
+      <div class="stat-item">
+        <div class="stat-number">24K</div>
+        <div class="stat-label">Abonnés Instagram</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">6K+</div>
+        <div class="stat-label">Clients Facebook</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">58</div>
+        <div class="stat-label">Wilayas Livrées</div>
+      </div>
+    </div>
+
+    <div class="scroll-indicator" aria-hidden="true">
+      <div class="arrow"></div>
+      <span>Découvrir</span>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- FEATURES / AVANTAGES -->
+  <!-- ======================================================== -->
+  <section id="features" aria-label="Nos avantages">
+    <div class="features-grid reveal-stagger">
+      <div class="feature-card reveal-up">
+        <div class="feature-icon">
+          <i class="fas fa-truck" aria-hidden="true"></i>
+        </div>
+        <h3 class="feature-title">Livraison Nationale</h3>
+        <p class="feature-desc">Nous livrons dans les 58 wilayas d'Algérie. Livraison gratuite à partir de 15 000 DA.
+        </p>
+      </div>
+      <div class="feature-card reveal-up">
+        <div class="feature-icon">
+          <i class="fas fa-hand-holding-usd" aria-hidden="true"></i>
+        </div>
+        <h3 class="feature-title">Paiement à la Livraison</h3>
+        <p class="feature-desc">Aucun paiement en ligne requis. Vous payez uniquement à la réception de votre commande.
+        </p>
+      </div>
+      <div class="feature-card reveal-up">
+        <div class="feature-icon">
+          <i class="fas fa-shield-alt" aria-hidden="true"></i>
+        </div>
+        <h3 class="feature-title">100% Authentique</h3>
+        <p class="feature-desc">Tous nos parfums sont originaux et importés directement des Émirats Arabes Unis.</p>
+      </div>
+      <div class="feature-card reveal-up">
+        <div class="feature-icon">
+          <i class="fab fa-whatsapp" aria-hidden="true"></i>
+        </div>
+        <h3 class="feature-title">Support WhatsApp</h3>
+        <p class="feature-desc">Notre équipe est disponible 7j/7 sur WhatsApp pour répondre à toutes vos questions.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- CATALOG -->
+  <!-- ======================================================== -->
+  <section id="catalog" aria-label="Catalogue de parfums">
+    <div class="section-header reveal-up">
+      <span class="section-sub">Notre Sélection</span>
+      <h2 class="section-title">Collection <span class="gold-text">Amir Parfume</span></h2>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="search-wrapper reveal-up">
+      <label for="search-input" class="sr-only">Rechercher un parfum</label>
+      <i class="fas fa-search search-icon" aria-hidden="true"></i>
+      <input type="search" id="search-input" name="search" placeholder="Rechercher un parfum, une marque..."
+        autocomplete="off">
+    </div>
+
+    <div class="filter-tabs" id="filter-tabs" role="group" aria-label="Filtrer par catégorie"></div>
+
+    <div class="products-grid" id="products-grid" role="list" aria-label="Produits"></div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- CHECKOUT -->
+  <!-- ======================================================== -->
+  <section id="checkout" aria-label="Finaliser la commande">
+    <div class="section-header">
+      <span class="section-sub">Commander</span>
+      <h2 class="section-title">Finaliser votre <span class="gold-text">Commande</span></h2>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="checkout-grid">
+      <!-- Form -->
+      <div class="checkout-form-card">
+        <h3 class="form-title"><i class="fas fa-user-circle" aria-hidden="true"></i> Vos Informations</h3>
+        <form id="order-form" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="firstName">Prénom *</label>
+              <input type="text" id="firstName" name="firstName" placeholder="Mohammed" required
+                autocomplete="given-name">
+            </div>
+            <div class="form-group">
+              <label for="lastName">Nom *</label>
+              <input type="text" id="lastName" name="lastName" placeholder="Benali" required autocomplete="family-name">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="phone">Téléphone *</label>
+              <input type="tel" id="phone" name="phone" placeholder="05 XX XX XX XX" required autocomplete="tel"
+                pattern="^(05|06|07)[0-9]{8}$" inputmode="tel">
+            </div>
+            <div class="form-group">
+              <label for="email">Email (optionnel)</label>
+              <input type="email" id="email" name="email" placeholder="email@exemple.com" autocomplete="email">
+            </div>
+          </div>
+
+          <!-- Wilaya & Commune -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="wilaya">Wilaya *</label>
+              <select name="wilaya" id="wilaya" required title="Sélectionnez votre wilaya">
+                <option value="">Choisir une wilaya...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="commune">Commune *</label>
+              <select name="commune" id="commune" required title="Sélectionnez votre commune" disabled>
+                <option value="">Choisir d'abord une wilaya...</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="address">Adresse complète *</label>
+            <input type="text" id="address" name="address" placeholder="N° de rue, quartier, cité..." required
+              autocomplete="street-address">
+          </div>
+
+          <!-- Delivery Method -->
+          <div class="form-group">
+            <label>Mode de livraison *</label>
+            <div class="delivery-options" id="delivery-options">
+              <label class="delivery-option selected" data-method="home">
+                <input type="radio" name="deliveryMethod" value="home" checked>
+                <div class="delivery-option-content">
+                  <div class="delivery-option-icon"><i class="fas fa-home" aria-hidden="true"></i></div>
+                  <div class="delivery-option-info">
+                    <span class="delivery-option-title">Livraison à domicile</span>
+                    <span class="delivery-option-desc">Livrée directement à votre adresse</span>
+                  </div>
+                  <span class="delivery-option-check"><i class="fas fa-check-circle" aria-hidden="true"></i></span>
+                </div>
+              </label>
+              <label class="delivery-option" data-method="relay">
+                <input type="radio" name="deliveryMethod" value="relay">
+                <div class="delivery-option-content">
+                  <div class="delivery-option-icon"><i class="fas fa-store" aria-hidden="true"></i></div>
+                  <div class="delivery-option-info">
+                    <span class="delivery-option-title">Retrait en point relais</span>
+                    <span class="delivery-option-desc">Retrait au bureau de livraison le plus proche</span>
+                  </div>
+                  <span class="delivery-option-check"><i class="fas fa-check-circle" aria-hidden="true"></i></span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="notes">Notes / Instructions (optionnel)</label>
+            <textarea id="notes" name="notes"
+              placeholder="Instructions spéciales de livraison, fragrance préférée..."></textarea>
+          </div>
+
+          <div class="no-payment-note">
+            <i class="fas fa-money-bill-wave info-icon-inline" aria-hidden="true"></i>
+            <span><strong>Paiement à la livraison uniquement.</strong> Aucun paiement en ligne requis. Notre équipe vous contactera dans
+              les 24h pour confirmer votre commande.</span>
+          </div>
+
+          <div class="form-actions-row">
+            <button type="button" class="btn btn-ghost" id="back-to-shop">
+              <i class="fas fa-arrow-left" aria-hidden="true"></i> Continuer les achats
+            </button>
+            <button type="submit" class="btn btn-gold btn-flex-1">
+              <i class="fas fa-check" aria-hidden="true"></i> Confirmer la Commande
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Summary -->
+      <div class="checkout-summary">
+        <h3 class="summary-title"><i class="fas fa-receipt" aria-hidden="true"></i> Récapitulatif</h3>
+        <div class="summary-items" id="summary-items" aria-live="polite"></div>
+        <div class="summary-divider"></div>
+        <div class="summary-row">
+          <span class="summary-label">Sous-total</span>
+          <span class="summary-value" id="summary-subtotal">0 DA</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Frais de livraison</span>
+          <span class="summary-value" id="summary-shipping">—</span>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-total-row">
+          <span class="summary-total-label">Total commande</span>
+          <span class="summary-total-amount" id="summary-total-amount">0 DA</span>
+        </div>
+        <div class="no-payment-note mb-0">
+          <i class="fas fa-truck info-icon-inline" aria-hidden="true"></i>
+          <span>Livraison disponible dans toute l'Algérie. Gratuite à partir de 15 000 DA.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- FOOTER -->
+  <!-- ======================================================== -->
+  <footer id="footer" role="contentinfo">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand-name">Amir Parfume</div>
+        <p class="footer-desc">امير للعطور — Votre spécialiste des parfums émiratis en Algérie. Latafa, Ard Al Zaafaran,
+          Fragrance World et bien plus encore à des prix accessibles.</p>
+        <p class="footer-desc footer-desc-contact">
+          <i class="fab fa-whatsapp" aria-hidden="true"></i> / <i class="fas fa-phone-alt" aria-hidden="true"></i>
+          <a href="tel:+213540567653">0540 56 76 53</a>
+        </p>
+        <div class="footer-social" role="list">
+          <a href="https://www.instagram.com/amir_parfume_/" class="social-link" target="_blank"
+            rel="noopener noreferrer" title="Instagram Amir Parfume" aria-label="Instagram Amir Parfume"
+            role="listitem">
+            <i class="fab fa-instagram" aria-hidden="true"></i>
+          </a>
+          <a href="https://www.tiktok.com/@amir_parfume" class="social-link" target="_blank" rel="noopener noreferrer"
+            title="TikTok Amir Parfume" aria-label="TikTok Amir Parfume" role="listitem">
+            <i class="fab fa-tiktok" aria-hidden="true"></i>
+          </a>
+          <a href="https://www.facebook.com/p/%D8%A7%D9%85%D9%8A%D8%B1-%D9%84%D9%84%D8%B9%D8%B7%D9%88%D8%B1-100095555226942/"
+            class="social-link" target="_blank" rel="noopener noreferrer" title="Facebook Amir Parfume"
+            aria-label="Facebook Amir Parfume" role="listitem">
+            <i class="fab fa-facebook-f" aria-hidden="true"></i>
+          </a>
+          <a href="https://wa.me/213540567653" class="social-link" target="_blank" rel="noopener noreferrer"
+            title="WhatsApp 0540 56 76 53" aria-label="Contacter sur WhatsApp" role="listitem">
+            <i class="fab fa-whatsapp" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+      <div>
+        <h4 class="footer-col-title">Navigation</h4>
+        <ul class="footer-links" role="list">
+          <li><a href="#catalog">Tous les Parfums</a></li>
+          <li><a href="#catalog" data-filter="homme">Parfums Homme</a></li>
+          <li><a href="#catalog" data-filter="femme">Parfums Femme</a></li>
+          <li><a href="#catalog" data-filter="unisexe">Parfums Unisexe</a></li>
+          <li><a href="#catalog" data-filter="promo">Promotions</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="footer-col-title">Information</h4>
+        <ul class="footer-links" role="list">
+          <li><a href="#features">Paiement à la livraison</a></li>
+          <li><a href="#features">Livraison en Algérie</a></li>
+          <li><a href="#features">Authenticité garantie</a></li>
+          <li><a href="https://wa.me/213540567653" target="_blank" rel="noopener noreferrer">Retours &amp; Échanges</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Amir Parfume — امير للعطور. Tous droits réservés.</p>
+      <p>Paiement à la livraison · Algérie 🇩🇿</p>
+    </div>
+  </footer>
+
+  <!-- ======================================================== -->
+  <!-- CART DRAWER -->
+  <!-- ======================================================== -->
+  <div id="cart-overlay" aria-hidden="true"></div>
+  <div id="cart-drawer" role="dialog" aria-label="Mon panier" aria-modal="true">
+    <div class="drawer-header">
+      <h2 class="drawer-title"><i class="fas fa-shopping-bag" aria-hidden="true"></i> Mon Panier</h2>
+      <button class="drawer-close" id="drawer-close" title="Fermer le panier" aria-label="Fermer le panier">
+        <i class="fas fa-times" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="cart-items-list" id="cart-items-list" aria-live="polite"></div>
+    <div class="drawer-footer">
+      <div class="cart-total-row">
+        <span class="cart-total-label">Total</span>
+        <span class="cart-total-amount" id="cart-total-amount">0 DA</span>
+      </div>
+      <button class="btn btn-gold btn-w-100" id="checkout-btn" disabled aria-label="Passer la commande">
+        <i class="fas fa-shipping-fast" aria-hidden="true"></i> Passer la Commande
+      </button>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- PRODUCT MODAL -->
+  <!-- ======================================================== -->
+  <div id="modal-overlay" role="dialog" aria-label="Détail du produit" aria-modal="true">
+    <div class="product-modal">
+      <div class="modal-image-wrap modal-image-col">
+        <div class="modal-image-container">
+          <img id="modal-image" src="" alt="" class="modal-main-img">
+          <button class="modal-close" id="modal-close-btn" title="Fermer" aria-label="Fermer la vue produit">
+            <i class="fas fa-times" aria-hidden="true"></i>
+          </button>
+        </div>
+        <div id="modal-thumbnails" class="modal-thumbnails-container" role="list" aria-label="Images du produit"></div>
+      </div>
+      <div class="modal-content">
+        <p class="modal-brand" id="modal-brand"></p>
+        <h2 class="modal-name" id="modal-name"></h2>
+        <p class="modal-volume" id="modal-volume"></p>
+        <div class="modal-badges" id="modal-badges" aria-label="Labels produit"></div>
+        <p class="modal-desc" id="modal-desc"></p>
+
+        <!-- Olfactive Notes Pyramid -->
+        <div class="olfactive-pyramid" id="olfactive-pyramid" style="display:none">
+          <h4 class="olfactive-title"><i class="fas fa-flask" aria-hidden="true"></i> Notes Olfactives</h4>
+          <div class="olfactive-notes">
+            <div class="olfactive-note" id="note-top">
+              <span class="note-icon">🔝</span>
+              <div class="note-info">
+                <span class="note-label">Notes de tête</span>
+                <span class="note-value" id="note-top-value"></span>
+              </div>
+            </div>
+            <div class="olfactive-note" id="note-heart">
+              <span class="note-icon">❤️</span>
+              <div class="note-info">
+                <span class="note-label">Notes de cœur</span>
+                <span class="note-value" id="note-heart-value"></span>
+              </div>
+            </div>
+            <div class="olfactive-note" id="note-base">
+              <span class="note-icon">🌿</span>
+              <div class="note-info">
+                <span class="note-label">Notes de fond</span>
+                <span class="note-value" id="note-base-value"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Olfactive Family -->
+        <div class="modal-olfactive-family" id="modal-olfactive-family" style="display:none">
+          <span class="family-label">Famille olfactive :</span>
+          <span class="family-value" id="modal-family-value"></span>
+        </div>
+
+        <div class="modal-tags" id="modal-tags" aria-label="Tags du parfum"></div>
+        <div class="modal-price-block">
+          <div class="modal-price-original" id="modal-price-original"></div>
+          <div class="modal-price-current" id="modal-price-current"></div>
+          <div class="modal-price-save" id="modal-price-save"></div>
+        </div>
+        <div class="modal-stock" aria-live="polite">
+          <span class="stock-dot" id="stock-dot"></span>
+          <span id="modal-stock-info"></span>
+        </div>
+        <div class="modal-add-row">
+          <div class="qty-selector" role="group" aria-label="Quantité">
+            <button class="qty-btn" id="modal-qty-minus" title="Diminuer la quantité" aria-label="Diminuer la quantité">
+              <i class="fas fa-minus" aria-hidden="true"></i>
+            </button>
+            <span class="qty-num" id="modal-qty-display" aria-live="polite">1</span>
+            <button class="qty-btn" id="modal-qty-plus" title="Augmenter la quantité"
+              aria-label="Augmenter la quantité">
+              <i class="fas fa-plus" aria-hidden="true"></i>
+            </button>
+          </div>
+          <button class="btn btn-gold btn-flex-1" id="modal-add-btn">
+            <i class="fas fa-shopping-bag" aria-hidden="true"></i> Ajouter au panier
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- ORDER CONFIRMATION -->
+  <!-- ======================================================== -->
+  <div id="confirm-overlay" role="dialog" aria-label="Commande confirmée" aria-modal="true">
+    <div class="confirm-modal">
+      <div class="confirm-icon"><i class="fas fa-check" aria-hidden="true"></i></div>
+      <h2 class="confirm-title">Commande Confirmée !</h2>
+      <span class="confirm-order-num" id="confirm-order-num" aria-live="polite"></span>
+      <p class="confirm-msg">
+        Merci pour votre commande ! Notre équipe vous contactera dans les <strong>24 heures</strong> pour confirmer les
+        détails et organiser la livraison.<br><br>
+        <strong>Paiement à la livraison.</strong>
+      </p>
+
+      <!-- Order Summary for Print -->
+      <div class="confirm-summary" id="confirm-summary"></div>
+
+      <div class="confirm-actions">
+        <button class="btn btn-outline" id="print-order-btn">
+          <i class="fas fa-print" aria-hidden="true"></i> Imprimer la commande
+        </button>
+        <button class="btn btn-outline" id="download-pdf-btn">
+          <i class="fas fa-file-pdf" aria-hidden="true"></i> Télécharger PDF
+        </button>
+        <button class="btn btn-gold btn-w-100" id="confirm-ok">
+          <i class="fas fa-home" aria-hidden="true"></i> Retour à l'accueil
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- PRINTABLE ORDER (Hidden, used for print/PDF) -->
+  <!-- ======================================================== -->
+  <div id="printable-order" class="printable-order" style="display:none">
+    <div class="print-header">
+      <div class="print-logo">
+        <h1>Amir Parfume</h1>
+        <p class="print-logo-sub">امير للعطور</p>
+      </div>
+      <div class="print-order-info">
+        <div class="print-order-num" id="print-order-num"></div>
+        <div class="print-order-date" id="print-order-date"></div>
+      </div>
+    </div>
+
+    <div class="print-section">
+      <h3>Informations Client</h3>
+      <table class="print-customer-table">
+        <tr><td class="print-label">Nom complet</td><td id="print-name"></td></tr>
+        <tr><td class="print-label">Téléphone</td><td id="print-phone"></td></tr>
+        <tr><td class="print-label">Email</td><td id="print-email"></td></tr>
+        <tr><td class="print-label">Wilaya</td><td id="print-wilaya"></td></tr>
+        <tr><td class="print-label">Commune</td><td id="print-commune"></td></tr>
+        <tr><td class="print-label">Adresse</td><td id="print-address"></td></tr>
+        <tr><td class="print-label">Livraison</td><td id="print-delivery"></td></tr>
+        <tr><td class="print-label">Notes</td><td id="print-notes"></td></tr>
+      </table>
+    </div>
+
+    <div class="print-section">
+      <h3>Articles Commandés</h3>
+      <table class="print-items-table">
+        <thead>
+          <tr>
+            <th>Produit</th>
+            <th>Marque</th>
+            <th>Prix unitaire</th>
+            <th>Qté</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody id="print-items"></tbody>
+      </table>
+    </div>
+
+    <div class="print-totals">
+      <div class="print-total-row">
+        <span>Sous-total</span>
+        <span id="print-subtotal"></span>
+      </div>
+      <div class="print-total-row">
+        <span>Livraison</span>
+        <span id="print-shipping"></span>
+      </div>
+      <div class="print-total-row print-grand-total">
+        <span>Total à payer</span>
+        <span id="print-total"></span>
+      </div>
+    </div>
+
+    <div class="print-footer">
+      <p><strong>Paiement à la livraison</strong> — Aucun paiement en ligne</p>
+      <p>📞 0540 56 76 53 · 📷 @amir_parfume_</p>
+      <p class="print-footer-small">Amir Parfume — امير للعطور · © 2026</p>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- TOAST -->
+  <!-- ======================================================== -->
+  <div id="toast-container" role="region" aria-label="Notifications" aria-live="polite"></div>
+
+  <!-- ======================================================== -->
+  <!-- BACK TO TOP -->
+  <!-- ======================================================== -->
+  <button id="back-to-top" aria-label="Retour en haut de page" title="Retour en haut">
+    <i class="fas fa-chevron-up" aria-hidden="true"></i>
+  </button>
+
+  <!-- Scripts -->
+  <script src="js/data.js?v=5"></script>
+  <script src="js/communes.js?v=5"></script>
+  <script src="js/store.js?v=5"></script>
+</body>
+
+</html>
