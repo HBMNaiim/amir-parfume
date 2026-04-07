@@ -9,6 +9,12 @@ let orders = [];
 let settings = {};
 let currentEditId = null;
 let currentOrderId = null;
+let currentOTP = null;
+
+// EmailJS Configuration (To be filled by the user)
+const EMAILJS_PUBLIC_KEY = 'rWilJusGknw2M0SUf';
+const EMAILJS_SERVICE_ID = 'service_enucn9c';
+const EMAILJS_TEMPLATE_ID = 'template_q993v02';
 
 // Pagination
 let currentPageOrders = 1;
@@ -44,16 +50,60 @@ const App = {
     const admin = DB.getAdmin();
 
     if (u === admin.username && p === admin.password) {
+      // Correct credentials, trigger 2FA
+
+      // 1. Generate 6-digit OTP
+      currentOTP = Math.floor(100000 + Math.random() * 900000).toString();
+
+      try {
+        // Init EmailJS
+        emailjs.init(EMAILJS_PUBLIC_KEY);
+
+        // 2. Hide Login Form, Show OTP Form
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('otp-form').style.display = 'block';
+        document.getElementById('otp-code').focus();
+
+        // 3. Send Email
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+          code: currentOTP
+        });
+
+        showToast('info', 'Un code vous a été envoyé par e-mail.', 'fa-envelope');
+      } catch (err) {
+        console.error("EmailJS Error:", err);
+        showToast('error', 'Erreur lors de l\'envoi du code. Vos identifiants EmailJS sont-ils corrects?', 'fa-exclamation-triangle');
+        // Reset forms if it fails
+        document.getElementById('login-form').style.display = 'block';
+        document.getElementById('otp-form').style.display = 'none';
+      }
+    } else {
+      showToast('error', 'Identifiants incorrects', 'fa-exclamation-circle');
+    }
+  },
+
+  async handleOTPVerification(e) {
+    if (e) e.preventDefault();
+    const code = document.getElementById('otp-code').value.trim();
+
+    if (code === currentOTP) {
       localStorage.setItem('admin_logged_in', 'true');
       document.getElementById('login-view').style.display = 'none';
       document.getElementById('admin-layout').style.display = 'flex';
-      showToast('success', 'Connexion réussie', 'fa-check');
+      showToast('success', 'Connexion sécurisée réussie', 'fa-shield-check');
       await this.loadData();
       this.navigate('dashboard-view');
       this.populateFilters();
     } else {
-      showToast('error', 'Identifiants incorrects', 'fa-exclamation-circle');
+      showToast('error', 'Code de sécurité incorrect', 'fa-times');
     }
+  },
+
+  cancelOTP() {
+    currentOTP = null;
+    document.getElementById('otp-code').value = '';
+    document.getElementById('login-form').style.display = 'block';
+    document.getElementById('otp-form').style.display = 'none';
   },
 
   logout() {
@@ -75,10 +125,10 @@ const App = {
     currentView = viewId;
     document.querySelectorAll('.admin-page').forEach(el => el.classList.remove('active'));
     document.getElementById(viewId).classList.add('active');
-    
+
     document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
     const btn = document.querySelector(`.nav-btn[data-target="${viewId}"]`);
-    if(btn) btn.classList.add('active');
+    if (btn) btn.classList.add('active');
 
     const titles = {
       'dashboard-view': 'Tableau de Bord',
@@ -98,8 +148,10 @@ const App = {
 
   bindEvents() {
     document.getElementById('login-form').addEventListener('submit', e => this.handleLogin(e));
+    document.getElementById('otp-form').addEventListener('submit', e => this.handleOTPVerification(e));
+    document.getElementById('cancel-otp-btn').addEventListener('click', () => this.cancelOTP());
     document.getElementById('logout-btn').addEventListener('click', () => this.logout());
-    
+
     document.querySelectorAll('.nav-btn[data-target]').forEach(btn => {
       btn.addEventListener('click', () => this.navigate(btn.dataset.target));
     });
@@ -116,7 +168,7 @@ const App = {
     document.getElementById('close-product-btn').addEventListener('click', () => this.closeModal('product-modal'));
     document.getElementById('cancel-product-btn').addEventListener('click', () => this.closeModal('product-modal'));
     document.getElementById('product-form').addEventListener('submit', e => this.saveProduct(e));
-    
+
     document.getElementById('product-search').addEventListener('input', () => this.renderProducts());
     document.getElementById('product-cat-filter').addEventListener('change', () => this.renderProducts());
     document.getElementById('product-stock-filter').addEventListener('change', () => this.renderProducts());
@@ -153,15 +205,15 @@ const App = {
 
   populateFilters() {
     const sel = document.getElementById('order-wilaya-filter');
-    if(sel && sel.options.length <= 1) { // Populate only once
-        if (typeof WILAYAS !== 'undefined') {
-            WILAYAS.forEach(w => {
-                const opt = document.createElement('option');
-                opt.value = w.name;
-                opt.textContent = w.name;
-                sel.appendChild(opt);
-            });
-        }
+    if (sel && sel.options.length <= 1) { // Populate only once
+      if (typeof WILAYAS !== 'undefined') {
+        WILAYAS.forEach(w => {
+          const opt = document.createElement('option');
+          opt.value = w.name;
+          opt.textContent = w.name;
+          sel.appendChild(opt);
+        });
+      }
     }
   },
 
@@ -198,17 +250,17 @@ const App = {
     // Top sales logic (mock calculation based on orders)
     let productSales = {};
     orders.forEach(o => {
-      if(o.status !== 'cancelled') {
+      if (o.status !== 'cancelled') {
         (o.items || []).forEach(i => {
-           productSales[i.id] = (productSales[i.id] || 0) + i.qty;
+          productSales[i.id] = (productSales[i.id] || 0) + i.qty;
         });
       }
     });
 
     let topProducts = products.map(p => ({
-        ...p,
-        soldQty: productSales[p.id] || 0
-    })).sort((a,b) => b.soldQty - a.soldQty).slice(0, 5);
+      ...p,
+      soldQty: productSales[p.id] || 0
+    })).sort((a, b) => b.soldQty - a.soldQty).slice(0, 5);
 
     const dashProducts = document.getElementById('dash-stock-body');
     if (topProducts.length === 0) {
@@ -220,7 +272,7 @@ const App = {
             <div class="d-flex align-items-center gap-2">
               <img src="${p.image}" style="width:32px;height:32px;border-radius:4px;object-fit:cover" onerror="this.src='data:image/svg+xml,...'">
               <div>
-                <div style="font-weight:600;font-size:0.9rem">${p.name} <span class="badge ${p.stock<=0 ? 'badge-danger' : (p.stock<=5 ? 'badge-warning' : '')}">${p.stock<=0?'Rupture':(p.stock<=5?`Stock: ${p.stock}`:'')}</span></div>
+                <div style="font-weight:600;font-size:0.9rem">${p.name} <span class="badge ${p.stock <= 0 ? 'badge-danger' : (p.stock <= 5 ? 'badge-warning' : '')}">${p.stock <= 0 ? 'Rupture' : (p.stock <= 5 ? `Stock: ${p.stock}` : '')}</span></div>
                 <div style="font-size:0.8rem;color:var(--text-muted)">Vendus: ${p.soldQty}</div>
               </div>
             </div>
@@ -259,7 +311,7 @@ const App = {
     let filtered = products.filter(p => {
       const matchQ = p.name.toLowerCase().includes(sq) || p.brand.toLowerCase().includes(sq);
       const matchCat = catF === 'all' || p.category === catF;
-      
+
       let matchStk = true;
       if (stkF === 'instock') matchStk = p.stock > 0;
       if (stkF === 'lowstock') matchStk = p.stock > 0 && p.stock <= 5;
@@ -340,7 +392,7 @@ const App = {
         document.getElementById('p-price').value = p.price;
         document.getElementById('p-promo').value = p.promoPrice || '';
         document.getElementById('p-stock').value = p.stock;
-        
+
         document.getElementById('p-family').value = p.olfactive_family || '';
         document.getElementById('p-notes-top').value = p.notes_top || '';
         document.getElementById('p-notes-heart').value = p.notes_heart || '';
@@ -376,7 +428,7 @@ const App = {
       price: parseInt(document.getElementById('p-price').value) || 0,
       promoPrice: parseInt(document.getElementById('p-promo').value) || null,
       stock: parseInt(document.getElementById('p-stock').value) || 0,
-      
+
       olfactive_family: document.getElementById('p-family').value,
       notes_top: document.getElementById('p-notes-top').value,
       notes_heart: document.getElementById('p-notes-heart').value,
@@ -430,22 +482,22 @@ const App = {
 
     let filtered = orders.filter(o => {
       const matchQ = (o.order_number || String(o.id)).toLowerCase().includes(sq) ||
-                     o.customer.firstName.toLowerCase().includes(sq) ||
-                     o.customer.lastName.toLowerCase().includes(sq) ||
-                     o.customer.phone.includes(sq);
-      
+        o.customer.firstName.toLowerCase().includes(sq) ||
+        o.customer.lastName.toLowerCase().includes(sq) ||
+        o.customer.phone.includes(sq);
+
       const matchStat = statF === 'all' || o.status === statF;
       const matchWil = wilF === 'all' || o.customer.wilaya === wilF;
-      
+
       let matchDate = true;
       if (dateF !== 'all') {
-         const oDate = new Date(o.date);
-         const now = new Date();
-         const diffTime = Math.abs(now - oDate);
-         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-         if (dateF === 'today') matchDate = diffDays <= 1 && oDate.getDate() === now.getDate();
-         else if (dateF === '7days') matchDate = diffDays <= 7;
-         else if (dateF === '30days') matchDate = diffDays <= 30;
+        const oDate = new Date(o.date);
+        const now = new Date();
+        const diffTime = Math.abs(now - oDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        if (dateF === 'today') matchDate = diffDays <= 1 && oDate.getDate() === now.getDate();
+        else if (dateF === '7days') matchDate = diffDays <= 7;
+        else if (dateF === '30days') matchDate = diffDays <= 30;
       }
 
       return matchQ && matchStat && matchWil && matchDate;
@@ -468,8 +520,8 @@ const App = {
         <td><strong>${o.order_number || o.id}</strong></td>
         <td>${formatDateShort(o.date)}</td>
         <td>${o.customer.firstName} ${o.customer.lastName}<br><span class="text-muted small">${o.customer.phone}</span></td>
-        <td>${o.customer.wilaya}<br><span class="badge" style="background:var(--border);color:var(--text-primary);font-size:0.75rem"><i class="fas fa-${o.delivery_method==='relay'?'store':'home'}"></i> ${o.delivery_method==='relay'?'Relais':'Domicile'}</span></td>
-        <td>${o.items.reduce((s,i)=>s+i.qty,0)} art.</td>
+        <td>${o.customer.wilaya}<br><span class="badge" style="background:var(--border);color:var(--text-primary);font-size:0.75rem"><i class="fas fa-${o.delivery_method === 'relay' ? 'store' : 'home'}"></i> ${o.delivery_method === 'relay' ? 'Relais' : 'Domicile'}</span></td>
+        <td>${o.items.reduce((s, i) => s + i.qty, 0)} art.</td>
         <td><strong>${formatPrice(o.total)}</strong></td>
         <td>${this.getStatusBadge(o.status)}</td>
         <td>
@@ -526,9 +578,9 @@ const App = {
       orders = await DB.getOrders();
       this.renderOrders();
       this.updateDashboard();
-      
+
       const o = orders.find(x => x.id === currentOrderId);
-      if(o) {
+      if (o) {
         document.getElementById('o-status-badge').innerHTML = this.getStatusBadge(o.status);
         document.getElementById('o-updated').textContent = o.updated_at ? new Date(o.updated_at).toLocaleString('fr-DZ') : '—';
       }
@@ -555,7 +607,7 @@ const App = {
     document.getElementById('slip-ref').textContent = o.order_number || o.id;
     // Basic barcode representation for styling
     document.getElementById('slip-barcode').textContent = `*${o.order_number || o.id}*`;
-    
+
     document.getElementById('slip-c-name').textContent = `${o.customer.firstName} ${o.customer.lastName}`;
     document.getElementById('slip-c-phone').textContent = o.customer.phone;
     document.getElementById('slip-c-address').textContent = o.customer.address;
@@ -579,13 +631,13 @@ const App = {
     const slipEl = document.getElementById('printable-slip');
     slipEl.style.display = 'block';
     document.body.classList.add('printing-slip');
-    
+
     setTimeout(() => {
-        window.print();
-        setTimeout(() => {
-            document.body.classList.remove('printing-slip');
-            slipEl.style.display = 'none';
-        }, 3000);
+      window.print();
+      setTimeout(() => {
+        document.body.classList.remove('printing-slip');
+        slipEl.style.display = 'none';
+      }, 3000);
     }, 150);
   },
 
@@ -606,7 +658,7 @@ const App = {
     document.getElementById('set-phone').value = settings.store_phone || '0540 56 76 53';
     document.getElementById('set-whatsapp').value = settings.store_whatsapp || '213540567653';
     document.getElementById('set-hero-bg').value = settings.heroBackground || '';
-    
+
     const sc = settings.shipping_config || {};
     document.getElementById('set-free-threshold').value = sc.free_threshold || 15000;
     document.getElementById('set-home-cost').value = sc.home_delivery_cost || 600;
@@ -659,19 +711,19 @@ const App = {
   renderPagination(containerId, totalPages, current, onClick) {
     const el = document.getElementById(containerId);
     if (totalPages <= 1) { el.innerHTML = ''; return; }
-    
+
     let html = `<button class="page-btn ${current === 1 ? 'disabled' : ''}" ${current === 1 ? 'disabled' : ''} data-page="${current - 1}"><i class="fas fa-chevron-left"></i> Précédent</button>`;
-    
+
     // Simple pagination (show all if few, otherwise could add ellipsis)
     for (let i = 1; i <= totalPages; i++) {
-        // Show bounds and current ± 2
-        if(i === 1 || i === totalPages || (i >= current - 1 && i <= current + 1)) {
-            html += `<button class="page-num ${i === current ? 'active' : ''}" data-page="${i}">${i}</button>`;
-        } else if (i === current - 2 || i === current + 2) {
-            html += `<span style="color:var(--text-muted);padding:0 5px">...</span>`;
-        }
+      // Show bounds and current ± 2
+      if (i === 1 || i === totalPages || (i >= current - 1 && i <= current + 1)) {
+        html += `<button class="page-num ${i === current ? 'active' : ''}" data-page="${i}">${i}</button>`;
+      } else if (i === current - 2 || i === current + 2) {
+        html += `<span style="color:var(--text-muted);padding:0 5px">...</span>`;
+      }
     }
-    
+
     html += `<button class="page-btn ${current === totalPages ? 'disabled' : ''}" ${current === totalPages ? 'disabled' : ''} data-page="${current + 1}">Suivant <i class="fas fa-chevron-right"></i></button>`;
     el.innerHTML = html;
 
