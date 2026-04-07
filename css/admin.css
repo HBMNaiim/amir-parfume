@@ -388,6 +388,12 @@ html[data-theme="light"] .order-totals { background: rgba(0,0,0,0.02); }
   .status-updater, .print-actions { width: 100%; justify-content: space-between; }
 }
 
+/* OTP / 2FA Form */
+.otp-form-hidden { display: none; }
+.otp-description { font-size: 0.9rem; margin-bottom: 1.5rem; color: var(--text-secondary); }
+.otp-input { letter-spacing: 5px; font-weight: bold; text-align: center; }
+.otp-cancel-btn { font-size: 0.8rem; margin-top: 1rem; }
+
 /* Printable Slip (A4) */
 .printable-slip {
   background: white; color: black; font-family: 'Inter', sans-serif; padding: 40px; margin: 0 auto; max-width: 800px; width: 100%; display: none;
@@ -413,8 +419,32 @@ html[data-theme="light"] .order-totals { background: rgba(0,0,0,0.02); }
 .slip-footer { text-align: center; border-top: 1px solid #eee; padding-top: 20px; font-size: 0.9rem; }
 
 @media print {
-  body.printing-slip * { visibility: hidden; }
-  body.printing-slip #printable-slip, body.printing-slip #printable-slip * { visibility: visible; }
-  body.printing-slip #printable-slip { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; }
-  body.printing-slip .slip-container { border: none; padding: 0; }
+  /* Hide everything except the delivery slip */
+  body.printing-slip > *:not(#printable-slip) {
+    display: none !important;
+  }
+  
+  body.printing-slip #printable-slip {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 20px !important;
+    background: white !important;
+    color: black !important;
+  }
+  
+  body.printing-slip #printable-slip * {
+    color: black !important;
+  }
+  
+  body.printing-slip .slip-container {
+    border: none !important;
+    padding: 0 !important;
+  }
+  
+  body.printing-slip {
+    background: white !important;
+  }
 }

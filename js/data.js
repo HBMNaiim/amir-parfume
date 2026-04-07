@@ -90,10 +90,12 @@ const DB = {
     if (dbClient) {
       if (product.id && !product.id.startsWith('temp_')) {
         const { data, error } = await dbClient.from('products').update(product).eq('id', product.id).select();
+        if (error) { console.error("Supabase update error:", error); throw new Error(error.message); }
         if (!error) return data[0];
       } else {
         delete product.id;
         const { data, error } = await dbClient.from('products').insert([product]).select();
+        if (error) { console.error("Supabase insert error:", error); throw new Error(error.message); }
         if (!error) return data[0];
       }
     }
@@ -175,6 +177,7 @@ const DB = {
 
     if (dbClient) {
       const { data, error } = await dbClient.from('orders').insert([order]).select();
+      if (error) { console.error("Supabase order insert error:", error); throw new Error(error.message); }
       if (!error) {
         const saved = data[0];
         for (const item of order.items) {

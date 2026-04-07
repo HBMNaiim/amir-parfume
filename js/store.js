@@ -887,10 +887,15 @@ function printOrder() {
     printEl.style.display = 'block';
     document.body.classList.add('printing');
     
-    window.print();
-    
-    document.body.classList.remove('printing');
-    setTimeout(() => { printEl.style.display = 'none'; }, 100);
+    // Give browser time to layout the visible element before printing
+    setTimeout(() => {
+        window.print();
+        // Wait for print dialog to complete before hiding
+        setTimeout(() => {
+            document.body.classList.remove('printing');
+            printEl.style.display = 'none';
+        }, 1000);
+    }, 300);
 }
 
 function downloadOrderPDF() {
@@ -899,19 +904,31 @@ function downloadOrderPDF() {
     
     const printEl = document.getElementById('printable-order');
     printEl.style.display = 'block';
+    
+    // Clone the full element (preserves classes for CSS matching)
+    const clone = printEl.cloneNode(true);
+    clone.removeAttribute('id');
+    clone.style.cssText = 'position:fixed; top:0; left:0; width:210mm; background:white !important; color:black !important; z-index:99999; padding:20px 30px; font-size:11pt;';
+    // Force ALL text inside to be black (defeats dark theme CSS variables)
+    clone.querySelectorAll('*').forEach(el => {
+        el.style.color = '#000';
+        el.style.borderColor = '#ccc';
+    });
+    document.body.appendChild(clone);
+    printEl.style.display = 'none';
 
     const options = {
-        margin: [10, 10, 10, 10],
-        filename: `Commande_${lastOrder.order_number}_AmiPparfume.pdf`,
+        margin: [8, 8, 8, 8],
+        filename: `Commande_${lastOrder.order_number}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
+        html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0, windowWidth: 794 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    html2pdf().set(options).from(printEl).save().then(() => {
-        printEl.style.display = 'none';
+    html2pdf().set(options).from(clone).save().then(() => {
+        clone.remove();
     }).catch(() => {
-        printEl.style.display = 'none';
+        clone.remove();
         showToast('error', 'Erreur lors de la génération du PDF', 'fa-exclamation-circle');
     });
 }
