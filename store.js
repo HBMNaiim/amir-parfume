@@ -885,19 +885,17 @@ function printOrder() {
     
     const printEl = document.getElementById('printable-order');
     printEl.style.display = 'block';
-    printEl.style.position = 'absolute';
-    printEl.style.top = '0';
     document.body.classList.add('printing');
     
+    // Give browser time to layout the visible element before printing
     setTimeout(() => {
         window.print();
+        // Wait for print dialog to complete before hiding
         setTimeout(() => {
             document.body.classList.remove('printing');
             printEl.style.display = 'none';
-            printEl.style.position = '';
-            printEl.style.top = '';
-        }, 3000); // Wait for mobile OS snapshot
-    }, 150); // Allow browser to layout before print
+        }, 1000);
+    }, 300);
 }
 
 function downloadOrderPDF() {
@@ -905,33 +903,27 @@ function downloadOrderPDF() {
     preparePrintData(lastOrder);
     
     const printEl = document.getElementById('printable-order');
-    printEl.style.display = 'block';
     
-    const originalPos = printEl.style.position;
-    const originalTop = printEl.style.top;
-    const originalZ = printEl.style.zIndex;
-    printEl.style.position = 'absolute';
-    printEl.style.top = '0';
-    printEl.style.zIndex = '9999';
+    // Clone the element into a temporary container for reliable capture
+    const tempContainer = document.createElement('div');
+    tempContainer.style.cssText = 'position:fixed; top:0; left:0; width:800px; background:white; color:black; z-index:99999; padding:40px;';
+    printEl.style.display = 'block';
+    tempContainer.innerHTML = printEl.innerHTML;
+    document.body.appendChild(tempContainer);
+    printEl.style.display = 'none';
 
     const options = {
         margin: [10, 10, 10, 10],
         filename: `Commande_${lastOrder.order_number}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0 },
+        html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0, windowWidth: 800 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    html2pdf().set(options).from(printEl).save().then(() => {
-        printEl.style.display = 'none';
-        printEl.style.position = originalPos;
-        printEl.style.top = originalTop;
-        printEl.style.zIndex = originalZ;
+    html2pdf().set(options).from(tempContainer).save().then(() => {
+        tempContainer.remove();
     }).catch(() => {
-        printEl.style.display = 'none';
-        printEl.style.position = originalPos;
-        printEl.style.top = originalTop;
-        printEl.style.zIndex = originalZ;
+        tempContainer.remove();
         showToast('error', 'Erreur lors de la génération du PDF', 'fa-exclamation-circle');
     });
 }

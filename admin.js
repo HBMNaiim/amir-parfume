@@ -61,7 +61,7 @@ const App = {
 
         // 2. Hide Login Form, Show OTP Form
         document.getElementById('login-form').style.display = 'none';
-        document.getElementById('otp-form').style.display = 'block';
+        document.getElementById('otp-form').classList.remove('otp-form-hidden');
         document.getElementById('otp-code').focus();
 
         // 3. Send Email
@@ -75,7 +75,7 @@ const App = {
         showToast('error', 'Erreur lors de l\'envoi du code. Vos identifiants EmailJS sont-ils corrects?', 'fa-exclamation-triangle');
         // Reset forms if it fails
         document.getElementById('login-form').style.display = 'block';
-        document.getElementById('otp-form').style.display = 'none';
+        document.getElementById('otp-form').classList.add('otp-form-hidden');
       }
     } else {
       showToast('error', 'Identifiants incorrects', 'fa-exclamation-circle');
@@ -103,7 +103,7 @@ const App = {
     currentOTP = null;
     document.getElementById('otp-code').value = '';
     document.getElementById('login-form').style.display = 'block';
-    document.getElementById('otp-form').style.display = 'none';
+    document.getElementById('otp-form').classList.add('otp-form-hidden');
   },
 
   logout() {
