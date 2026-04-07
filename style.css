@@ -2857,22 +2857,62 @@ html[data-theme="light"] .confirm-summary-total {
     display: none !important;
   }
   
+  body.printing {
+    background: white !important;
+    color: black !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
   body.printing #printable-order {
     display: block !important;
     position: static !important;
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
-    padding: 20px !important;
+    padding: 15px !important;
     background: white !important;
     color: black !important;
+    font-size: 11pt !important;
   }
   
-  body.printing #printable-order * {
+  body.printing #printable-order *,
+  body.printing #printable-order h1,
+  body.printing #printable-order h2,
+  body.printing #printable-order h3,
+  body.printing #printable-order p,
+  body.printing #printable-order td,
+  body.printing #printable-order th,
+  body.printing #printable-order span,
+  body.printing #printable-order div {
     color: black !important;
+    background: transparent !important;
   }
   
-  body.printing {
-    background: white !important;
+  body.printing #printable-order th {
+    background: #f0f0f0 !important;
+  }
+  
+  body.printing #printable-order table,
+  body.printing #printable-order td,
+  body.printing #printable-order th {
+    border-color: #999 !important;
+  }
+  
+  body.printing .print-header {
+    padding-bottom: 10px !important;
+    margin-bottom: 15px !important;
+  }
+  
+  body.printing .print-section {
+    margin-bottom: 15px !important;
+  }
+  
+  body.printing .print-totals {
+    margin-bottom: 15px !important;
+  }
+  
+  body.printing .print-footer {
+    margin-top: 20px !important;
   }
 }

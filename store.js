@@ -903,27 +903,32 @@ function downloadOrderPDF() {
     preparePrintData(lastOrder);
     
     const printEl = document.getElementById('printable-order');
-    
-    // Clone the element into a temporary container for reliable capture
-    const tempContainer = document.createElement('div');
-    tempContainer.style.cssText = 'position:fixed; top:0; left:0; width:800px; background:white; color:black; z-index:99999; padding:40px;';
     printEl.style.display = 'block';
-    tempContainer.innerHTML = printEl.innerHTML;
-    document.body.appendChild(tempContainer);
+    
+    // Clone the full element (preserves classes for CSS matching)
+    const clone = printEl.cloneNode(true);
+    clone.removeAttribute('id');
+    clone.style.cssText = 'position:fixed; top:0; left:0; width:210mm; background:white !important; color:black !important; z-index:99999; padding:20px 30px; font-size:11pt;';
+    // Force ALL text inside to be black (defeats dark theme CSS variables)
+    clone.querySelectorAll('*').forEach(el => {
+        el.style.color = '#000';
+        el.style.borderColor = '#ccc';
+    });
+    document.body.appendChild(clone);
     printEl.style.display = 'none';
 
     const options = {
-        margin: [10, 10, 10, 10],
+        margin: [8, 8, 8, 8],
         filename: `Commande_${lastOrder.order_number}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0, windowWidth: 800 },
+        html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0, windowWidth: 794 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    html2pdf().set(options).from(tempContainer).save().then(() => {
-        tempContainer.remove();
+    html2pdf().set(options).from(clone).save().then(() => {
+        clone.remove();
     }).catch(() => {
-        tempContainer.remove();
+        clone.remove();
         showToast('error', 'Erreur lors de la génération du PDF', 'fa-exclamation-circle');
     });
 }

@@ -177,6 +177,7 @@ const DB = {
 
     if (dbClient) {
       const { data, error } = await dbClient.from('orders').insert([order]).select();
+      if (error) { console.error("Supabase order insert error:", error); throw new Error(error.message); }
       if (!error) {
         const saved = data[0];
         for (const item of order.items) {
