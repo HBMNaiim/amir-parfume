@@ -4,7 +4,7 @@
 // ============================================================
 
 // CONFIGURATION SUPABASE
-const SUPABASE_URL = 'sb_publishable_QJs6UZFAOsHt1t991PI0UA_-wPRtOFY';
+const SUPABASE_URL = 'https://seqjtokzwcfxdtptzbxr.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlcWp0b2t6d2NmeGR0cHR6YnhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NDcwODQsImV4cCI6MjA5MTEyMzA4NH0.68tTft9vM8PP4Ok32rzQfA1VDwJn-zp-VfBEFs_1FeU';
 
 let dbClient = null;
