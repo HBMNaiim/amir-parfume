@@ -489,7 +489,8 @@
           <span class="stock-dot" id="stock-dot"></span>
           <span id="modal-stock-info"></span>
         </div>
-        <div class="modal-add-row">
+        <div class="modal-total-price" id="modal-total-price" style="text-align: right; margin-bottom: 10px; font-weight: bold; font-size: 1.1rem; color: var(--gold); display: none;"></div>
+        <div class="modal-add-row" style="flex-wrap: wrap; gap: 10px;">
           <div class="qty-selector" role="group" aria-label="Quantité">
             <button class="qty-btn" id="modal-qty-minus" title="Diminuer la quantité" aria-label="Diminuer la quantité">
               <i class="fas fa-minus" aria-hidden="true"></i>
@@ -500,8 +501,11 @@
               <i class="fas fa-plus" aria-hidden="true"></i>
             </button>
           </div>
-          <button class="btn btn-gold btn-flex-1" id="modal-add-btn">
-            <i class="fas fa-shopping-bag" aria-hidden="true"></i> Ajouter au panier
+          <button class="btn btn-outline" style="flex: 1; min-width: 140px;" id="modal-add-btn">
+            <i class="fas fa-cart-plus" aria-hidden="true"></i> Ajouter au panier
+          </button>
+          <button class="btn btn-gold" style="flex: 1; min-width: 140px;" id="modal-buy-now-btn">
+            <i class="fas fa-bolt" aria-hidden="true"></i> Passer commande
           </button>
         </div>
       </div>
@@ -526,12 +530,6 @@
       <div class="confirm-summary" id="confirm-summary"></div>
 
       <div class="confirm-actions">
-        <button class="btn btn-outline" id="print-order-btn">
-          <i class="fas fa-print" aria-hidden="true"></i> Imprimer la commande
-        </button>
-        <button class="btn btn-outline" id="download-pdf-btn">
-          <i class="fas fa-file-pdf" aria-hidden="true"></i> Télécharger PDF
-        </button>
         <button class="btn btn-gold btn-w-100" id="confirm-ok">
           <i class="fas fa-home" aria-hidden="true"></i> Retour à l'accueil
         </button>
@@ -539,72 +537,7 @@
     </div>
   </div>
 
-  <!-- ======================================================== -->
-  <!-- PRINTABLE ORDER (Hidden, used for print/PDF) -->
-  <!-- ======================================================== -->
-  <div id="printable-order" class="printable-order" style="display:none">
-    <div class="print-header">
-      <div class="print-logo">
-        <h1>Amir Parfume</h1>
-        <p class="print-logo-sub">امير للعطور</p>
-      </div>
-      <div class="print-order-info">
-        <div class="print-order-num" id="print-order-num"></div>
-        <div class="print-order-date" id="print-order-date"></div>
-      </div>
-    </div>
 
-    <div class="print-section">
-      <h3>Informations Client</h3>
-      <table class="print-customer-table">
-        <tr><td class="print-label">Nom complet</td><td id="print-name"></td></tr>
-        <tr><td class="print-label">Téléphone</td><td id="print-phone"></td></tr>
-        <tr><td class="print-label">Email</td><td id="print-email"></td></tr>
-        <tr><td class="print-label">Wilaya</td><td id="print-wilaya"></td></tr>
-        <tr><td class="print-label">Commune</td><td id="print-commune"></td></tr>
-        <tr><td class="print-label">Adresse</td><td id="print-address"></td></tr>
-        <tr><td class="print-label">Livraison</td><td id="print-delivery"></td></tr>
-        <tr><td class="print-label">Notes</td><td id="print-notes"></td></tr>
-      </table>
-    </div>
-
-    <div class="print-section">
-      <h3>Articles Commandés</h3>
-      <table class="print-items-table">
-        <thead>
-          <tr>
-            <th>Produit</th>
-            <th>Marque</th>
-            <th>Prix unitaire</th>
-            <th>Qté</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody id="print-items"></tbody>
-      </table>
-    </div>
-
-    <div class="print-totals">
-      <div class="print-total-row">
-        <span>Sous-total</span>
-        <span id="print-subtotal"></span>
-      </div>
-      <div class="print-total-row">
-        <span>Livraison</span>
-        <span id="print-shipping"></span>
-      </div>
-      <div class="print-total-row print-grand-total">
-        <span>Total à payer</span>
-        <span id="print-total"></span>
-      </div>
-    </div>
-
-    <div class="print-footer">
-      <p><strong>Paiement à la livraison</strong> — Aucun paiement en ligne</p>
-      <p>📞 0540 56 76 53 · 📷 @amir_parfume_</p>
-      <p class="print-footer-small">Amir Parfume — امير للعطور · © 2026</p>
-    </div>
-  </div>
 
   <!-- ======================================================== -->
   <!-- TOAST -->

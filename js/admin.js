@@ -190,6 +190,7 @@ const App = {
     document.getElementById('btn-update-status').addEventListener('click', () => this.updateOrderStatus());
     document.getElementById('btn-delete-order').addEventListener('click', () => this.deleteOrder());
     document.getElementById('btn-print-slip').addEventListener('click', () => this.printDeliverySlip());
+    document.getElementById('btn-download-pdf').addEventListener('click', () => this.downloadDeliverySlipPDF());
 
     // Settings
     document.getElementById('btn-save-settings').addEventListener('click', () => this.saveSettings());
@@ -289,7 +290,7 @@ const App = {
       tbody.innerHTML = `<tr><td colspan="5" class="text-center">Aucune commande.</td></tr>`;
     } else {
       tbody.innerHTML = recentOrders.map(o => `
-        <tr style="cursor:pointer" onclick="App.openOrderModal(${o.id})">
+        <tr style="cursor:pointer" onclick="App.openOrderModal('${o.id}')">
           <td><strong>${o.order_number || o.id}</strong></td>
           <td>${o.customer.firstName} ${o.customer.lastName}</td>
           <td>${formatDateShort(o.date)}</td>
@@ -525,7 +526,7 @@ const App = {
         <td><strong>${formatPrice(o.total)}</strong></td>
         <td>${this.getStatusBadge(o.status)}</td>
         <td>
-          <button class="btn btn-outline btn-sm" onclick="App.openOrderModal(${o.id})">Gérer</button>
+          <button class="btn btn-outline btn-sm" onclick="App.openOrderModal('${o.id}')">Gérer</button>
         </td>
       </tr>
     `).join('');
@@ -639,6 +640,63 @@ const App = {
         slipEl.style.display = 'none';
       }, 3000);
     }, 150);
+  },
+
+  downloadDeliverySlipPDF() {
+    if (!currentOrderId) return;
+    const o = orders.find(x => x.id === currentOrderId);
+    if (!o) return;
+
+    // Reuse print data preparation
+    document.getElementById('slip-ref').textContent = o.order_number || o.id;
+    document.getElementById('slip-barcode').textContent = `*${o.order_number || o.id}*`;
+    document.getElementById('slip-c-name').textContent = `${o.customer.firstName} ${o.customer.lastName}`;
+    document.getElementById('slip-c-phone').textContent = o.customer.phone;
+    document.getElementById('slip-c-address').textContent = o.customer.address;
+    document.getElementById('slip-c-commune').textContent = o.customer.commune || '';
+    document.getElementById('slip-c-wilaya').textContent = o.customer.wilaya;
+    document.getElementById('slip-c-method').textContent = o.delivery_method === 'relay' ? 'Retrait en point relais' : 'Livraison à domicile';
+
+    document.getElementById('slip-items-body').innerHTML = o.items.map(i => `
+      <tr>
+        <td>${i.name} - ${i.brand}</td>
+        <td style="text-align:center">${i.qty}</td>
+        <td style="text-align:right">${formatPrice(i.price)}</td>
+        <td style="text-align:right">${formatPrice(i.price * i.qty)}</td>
+      </tr>
+    `).join('');
+
+    document.getElementById('slip-subtotal').textContent = formatPrice(o.subtotal || o.total);
+    document.getElementById('slip-shipping').textContent = o.shipping_cost === 0 ? 'Gratuite' : formatPrice(o.shipping_cost || 0);
+    document.getElementById('slip-total').textContent = formatPrice(o.total);
+
+    const slipEl = document.getElementById('printable-slip');
+    slipEl.style.display = 'block';
+
+    const clone = slipEl.cloneNode(true);
+    clone.removeAttribute('id');
+    clone.style.cssText = 'position:fixed; top:0; left:0; width:210mm; background:white !important; color:black !important; z-index:99999; padding:20px 30px; font-size:11pt;';
+    clone.querySelectorAll('*').forEach(el => {
+        el.style.color = '#000';
+        el.style.borderColor = '#ccc';
+    });
+    document.body.appendChild(clone);
+    slipEl.style.display = 'none';
+
+    const options = {
+        margin: [8, 8, 8, 8],
+        filename: `Bon_Livraison_${o.order_number || o.id}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0, windowWidth: 794 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(options).from(clone).save().then(() => {
+        clone.remove();
+    }).catch(() => {
+        clone.remove();
+        showToast('error', 'Erreur lors de la génération du PDF', 'fa-exclamation-triangle');
+    });
   },
 
   getStatusBadge(status) {

@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 
 <body>
@@ -357,9 +358,9 @@
                   </div>
                 </div>
                 <div class="form-group">
-                  <label for="set-hero-bg">Image Hero (URL)</label>
+                  <label for="set-hero-bg">Fond d'écran page d'accueil (URL)</label>
                   <input type="text" id="set-hero-bg" placeholder="https://example.com/image.jpg">
-                  <small class="form-text">Si vide, l'image par défaut sera utilisée.</small>
+                  <small class="form-text">Entrez l'URL de l'image. Si vide, l'image par défaut sera utilisée.</small>
                 </div>
               </div>
             </div>
@@ -632,7 +633,10 @@
           </div>
           <div class="print-actions">
             <button class="btn btn-gold" id="btn-print-slip">
-              <i class="fas fa-print" aria-hidden="true"></i> Bon de livraison
+              <i class="fas fa-print" aria-hidden="true"></i> Impression
+            </button>
+            <button class="btn btn-outline" id="btn-download-pdf">
+              <i class="fas fa-file-pdf" aria-hidden="true"></i> PDF
             </button>
             <button class="btn btn-danger btn-ghost" id="btn-delete-order">
               <i class="fas fa-trash" aria-hidden="true"></i> Supprimer

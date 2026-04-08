@@ -203,18 +203,39 @@ function bindEvents() {
     }
 
     // Modal qty
+    function updateModalTotalPrice() {
+        const el = document.getElementById('modal-total-price');
+        if (!currentProduct) return;
+        if (modalQty > 1) {
+            const price = currentProduct.promoPrice || currentProduct.price;
+            el.style.display = 'block';
+            el.textContent = `Total : ${formatPrice(price * modalQty)}`;
+        } else {
+            el.style.display = 'none';
+        }
+    }
+
     document.getElementById('modal-qty-minus').addEventListener('click', () => {
-        if (modalQty > 1) { modalQty--; document.getElementById('modal-qty-display').textContent = modalQty; }
+        if (modalQty > 1) { modalQty--; document.getElementById('modal-qty-display').textContent = modalQty; updateModalTotalPrice(); }
     });
     document.getElementById('modal-qty-plus').addEventListener('click', () => {
         if (currentProduct && modalQty < currentProduct.stock) {
             modalQty++;
             document.getElementById('modal-qty-display').textContent = modalQty;
+            updateModalTotalPrice();
         }
     });
     document.getElementById('modal-add-btn').addEventListener('click', () => {
         if (currentProduct) addToCart(currentProduct, modalQty);
         closeModal();
+    });
+    document.getElementById('modal-buy-now-btn').addEventListener('click', () => {
+        if (currentProduct) {
+            addToCart(currentProduct, modalQty);
+            closeModal();
+            closeCart();
+            showCheckout();
+        }
     });
 
     // Checkout btn
@@ -239,9 +260,7 @@ function bindEvents() {
         document.getElementById('catalog').scrollIntoView({ behavior: 'smooth' });
     });
 
-    // Print & PDF buttons
-    document.getElementById('print-order-btn').addEventListener('click', printOrder);
-    document.getElementById('download-pdf-btn').addEventListener('click', downloadOrderPDF);
+
 
     // Back to top
     document.getElementById('back-to-top').addEventListener('click', () => {
@@ -496,6 +515,7 @@ function openModal(product) {
     currentProduct = product;
     modalQty = 1;
     document.getElementById('modal-qty-display').textContent = 1;
+    document.getElementById('modal-total-price').style.display = 'none';
 
     const overlay = document.getElementById('modal-overlay');
     document.getElementById('modal-brand').textContent = product.brand;
@@ -585,21 +605,25 @@ function openModal(product) {
     const stockEl = document.getElementById('modal-stock-info');
     const dot = document.getElementById('stock-dot');
     const addBtn = document.getElementById('modal-add-btn');
+    const buyBtn = document.getElementById('modal-buy-now-btn');
     if (product.stock === 0) {
         dot.className = 'stock-dot out';
         stockEl.textContent = 'Rupture de stock';
         addBtn.disabled = true;
+        buyBtn.disabled = true;
         addBtn.innerHTML = '<i class="fas fa-ban"></i> Indisponible';
     } else if (product.stock <= 5) {
         dot.className = 'stock-dot low';
         stockEl.textContent = `Plus que ${product.stock} en stock !`;
         addBtn.disabled = false;
-        addBtn.innerHTML = '<i class="fas fa-shopping-bag"></i> Ajouter au panier';
+        buyBtn.disabled = false;
+        addBtn.innerHTML = '<i class="fas fa-cart-plus"></i> Ajouter au panier';
     } else {
         dot.className = 'stock-dot in';
         stockEl.textContent = 'En stock';
         addBtn.disabled = false;
-        addBtn.innerHTML = '<i class="fas fa-shopping-bag"></i> Ajouter au panier';
+        buyBtn.disabled = false;
+        addBtn.innerHTML = '<i class="fas fa-cart-plus"></i> Ajouter au panier';
     }
 
     overlay.classList.add('open');
@@ -848,90 +872,7 @@ function buildConfirmSummary(order) {
     </div>`;
 }
 
-// ---- Print & PDF -------------------------------------------
-function preparePrintData(order) {
-    if (!order) return;
-    const deliveryLabel = order.delivery_method === 'relay' ? 'Retrait en point relais' : 'Livraison à domicile';
 
-    document.getElementById('print-order-num').textContent = order.order_number;
-    document.getElementById('print-order-date').textContent = new Date(order.date || Date.now()).toLocaleDateString('fr-DZ', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-    document.getElementById('print-name').textContent = `${order.customer.firstName} ${order.customer.lastName}`;
-    document.getElementById('print-phone').textContent = order.customer.phone;
-    document.getElementById('print-email').textContent = order.customer.email || '—';
-    document.getElementById('print-wilaya').textContent = order.customer.wilaya;
-    document.getElementById('print-commune').textContent = order.customer.commune || '—';
-    document.getElementById('print-address').textContent = order.customer.address;
-    document.getElementById('print-delivery').textContent = deliveryLabel;
-    document.getElementById('print-notes').textContent = order.customer.notes || '—';
-
-    document.getElementById('print-items').innerHTML = order.items.map(i => `
-      <tr>
-        <td>${i.name}</td>
-        <td>${i.brand}</td>
-        <td>${formatPrice(i.price)}</td>
-        <td>${i.qty}</td>
-        <td>${formatPrice(i.price * i.qty)}</td>
-      </tr>
-    `).join('');
-
-    document.getElementById('print-subtotal').textContent = formatPrice(order.subtotal || order.total);
-    document.getElementById('print-shipping').textContent = order.shipping_cost === 0 ? 'Gratuite' : formatPrice(order.shipping_cost || 0);
-    document.getElementById('print-total').textContent = formatPrice(order.total);
-}
-
-function printOrder() {
-    if (!lastOrder) return;
-    preparePrintData(lastOrder);
-    
-    const printEl = document.getElementById('printable-order');
-    printEl.style.display = 'block';
-    document.body.classList.add('printing');
-    
-    // Give browser time to layout the visible element before printing
-    setTimeout(() => {
-        window.print();
-        // Wait for print dialog to complete before hiding
-        setTimeout(() => {
-            document.body.classList.remove('printing');
-            printEl.style.display = 'none';
-        }, 1000);
-    }, 300);
-}
-
-function downloadOrderPDF() {
-    if (!lastOrder) return;
-    preparePrintData(lastOrder);
-    
-    const printEl = document.getElementById('printable-order');
-    printEl.style.display = 'block';
-    
-    // Clone the full element (preserves classes for CSS matching)
-    const clone = printEl.cloneNode(true);
-    clone.removeAttribute('id');
-    clone.style.cssText = 'position:fixed; top:0; left:0; width:210mm; background:white !important; color:black !important; z-index:99999; padding:20px 30px; font-size:11pt;';
-    // Force ALL text inside to be black (defeats dark theme CSS variables)
-    clone.querySelectorAll('*').forEach(el => {
-        el.style.color = '#000';
-        el.style.borderColor = '#ccc';
-    });
-    document.body.appendChild(clone);
-    printEl.style.display = 'none';
-
-    const options = {
-        margin: [8, 8, 8, 8],
-        filename: `Commande_${lastOrder.order_number}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0, windowWidth: 794 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    html2pdf().set(options).from(clone).save().then(() => {
-        clone.remove();
-    }).catch(() => {
-        clone.remove();
-        showToast('error', 'Erreur lors de la génération du PDF', 'fa-exclamation-circle');
-    });
-}
 
 // ---- Toast -------------------------------------------------
 function showToast(type, message, icon) {
