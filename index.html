@@ -323,7 +323,7 @@
           <span class="summary-label">Sous-total</span>
           <span class="summary-value" id="summary-subtotal">0 DA</span>
         </div>
-        <div class="summary-row">
+        <div class="summary-row" id="summary-shipping-row">
           <span class="summary-label">Frais de livraison</span>
           <span class="summary-value" id="summary-shipping">—</span>
         </div>
@@ -332,9 +332,9 @@
           <span class="summary-total-label">Total commande</span>
           <span class="summary-total-amount" id="summary-total-amount">0 DA</span>
         </div>
-        <div class="no-payment-note mb-0">
+        <div class="no-payment-note mb-0" id="checkout-shipping-note">
           <i class="fas fa-truck info-icon-inline" aria-hidden="true"></i>
-          <span>Livraison disponible dans toute l'Algérie. Gratuite à partir de 15 000 DA.</span>
+          <span>Livraison disponible dans toute l'Algérie. Gratuite à partir de <span id="checkout-free-threshold">15 000 DA</span>.</span>
         </div>
       </div>
     </div>

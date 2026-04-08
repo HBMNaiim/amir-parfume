@@ -568,6 +568,11 @@ const App = {
     document.getElementById('o-shipping').textContent = o.shipping_cost === 0 ? 'Gratuite' : formatPrice(o.shipping_cost || 0);
     document.getElementById('o-total').textContent = formatPrice(o.total);
 
+    const sc = settings.shipping_config || {};
+    const hideShipping = sc.enabled === false;
+    document.getElementById('o-shipping-row').style.display = hideShipping ? 'none' : 'flex';
+    document.getElementById('slip-shipping-row').style.display = hideShipping ? 'none' : 'flex';
+
     document.getElementById('o-status-select').value = o.status;
     document.getElementById('order-modal').classList.add('open');
   },
@@ -647,41 +652,71 @@ const App = {
     const o = orders.find(x => x.id === currentOrderId);
     if (!o) return;
 
-    // Reuse print data preparation
-    document.getElementById('slip-ref').textContent = o.order_number || o.id;
-    document.getElementById('slip-barcode').textContent = `*${o.order_number || o.id}*`;
-    document.getElementById('slip-c-name').textContent = `${o.customer.firstName} ${o.customer.lastName}`;
-    document.getElementById('slip-c-phone').textContent = o.customer.phone;
-    document.getElementById('slip-c-address').textContent = o.customer.address;
-    document.getElementById('slip-c-commune').textContent = o.customer.commune || '';
-    document.getElementById('slip-c-wilaya').textContent = o.customer.wilaya;
-    document.getElementById('slip-c-method').textContent = o.delivery_method === 'relay' ? 'Retrait en point relais' : 'Livraison à domicile';
+    // Build a pure HTML string for the PDF to isolate it from dark mode CSS
+    const pdfHtml = `
+      <div style="padding: 20px 30px; font-family: 'Inter', sans-serif; background: #ffffff; color: #000000;">
+        <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px;">
+          <div>
+            <h2 style="margin: 0; font-size: 24px;">Amir Parfume</h2>
+            <p style="margin: 0; font-size: 14px; color: #555;">امير للعطور</p>
+          </div>
+          <div style="text-align: right;">
+            <p style="margin: 0; font-size: 18px; font-weight: bold;">Bon de Livraison</p>
+            <p style="margin: 0; font-size: 14px;">Réf: ${o.order_number || o.id}</p>
+            <p style="margin: 5px 0 0; font-size: 12px; font-family: monospace;">*${o.order_number || o.id}*</p>
+          </div>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+          <h3 style="font-size: 16px; margin-bottom: 10px; border-bottom: 1px dashed #ccc; padding-bottom: 5px;">Informations Client</h3>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Nom complet:</strong> ${o.customer.firstName} ${o.customer.lastName}</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Téléphone:</strong> ${o.customer.phone}</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Adresse:</strong> ${o.customer.address}, ${o.customer.commune || ''}, ${o.customer.wilaya}</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Méthode:</strong> ${o.delivery_method === 'relay' ? 'Retrait en point relais' : 'Livraison à domicile'}</p>
+        </div>
 
-    document.getElementById('slip-items-body').innerHTML = o.items.map(i => `
-      <tr>
-        <td>${i.name} - ${i.brand}</td>
-        <td style="text-align:center">${i.qty}</td>
-        <td style="text-align:right">${formatPrice(i.price)}</td>
-        <td style="text-align:right">${formatPrice(i.price * i.qty)}</td>
-      </tr>
-    `).join('');
+        <h3 style="font-size: 16px; margin-bottom: 10px; border-bottom: 1px dashed #ccc; padding-bottom: 5px;">Articles</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px;">
+          <thead>
+            <tr style="border-bottom: 1px solid #000;">
+              <th style="padding: 8px; text-align: left;">Désignation</th>
+              <th style="padding: 8px; text-align: center;">Qté</th>
+              <th style="padding: 8px; text-align: right;">P.U</th>
+              <th style="padding: 8px; text-align: right;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${o.items.map(i => `
+            <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #eee;">${i.name} - ${i.brand}</td>
+              <td style="padding: 8px; text-align: center; border-bottom: 1px solid #eee;">${i.qty}</td>
+              <td style="padding: 8px; text-align: right; border-bottom: 1px solid #eee;">${formatPrice(i.price)}</td>
+              <td style="padding: 8px; text-align: right; border-bottom: 1px solid #eee;">${formatPrice(i.price * i.qty)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
 
-    document.getElementById('slip-subtotal').textContent = formatPrice(o.subtotal || o.total);
-    document.getElementById('slip-shipping').textContent = o.shipping_cost === 0 ? 'Gratuite' : formatPrice(o.shipping_cost || 0);
-    document.getElementById('slip-total').textContent = formatPrice(o.total);
+        <div style="display: flex; justify-content: flex-end;">
+          <div style="width: 250px;">
+            <div style="display: flex; justify-content: space-between; padding: 5px 0; font-size: 14px;">
+              <span>Sous-total:</span> <strong>${formatPrice(o.subtotal || o.total)}</strong>
+            </div>
+            ${(settings.shipping_config?.enabled === false) ? '' : `
+            <div style="display: flex; justify-content: space-between; padding: 5px 0; font-size: 14px; border-bottom: 1px solid #ccc;">
+              <span>Frais de livraison:</span> <strong>${o.shipping_cost === 0 ? 'Gratuite' : formatPrice(o.shipping_cost || 0)}</strong>
+            </div>`}
+            <div style="display: flex; justify-content: space-between; padding: 10px 0; font-size: 18px; font-weight: bold;">
+              <span>Net à payer:</span> <span>${formatPrice(o.total)}</span>
+            </div>
+          </div>
+        </div>
 
-    const slipEl = document.getElementById('printable-slip');
-    slipEl.style.display = 'block';
-
-    const clone = slipEl.cloneNode(true);
-    clone.removeAttribute('id');
-    clone.style.cssText = 'position:fixed; top:0; left:0; width:210mm; background:white !important; color:black !important; z-index:99999; padding:20px 30px; font-size:11pt;';
-    clone.querySelectorAll('*').forEach(el => {
-        el.style.color = '#000';
-        el.style.borderColor = '#ccc';
-    });
-    document.body.appendChild(clone);
-    slipEl.style.display = 'none';
+        <div style="margin-top: 50px; text-align: center; font-size: 12px; color: #555;">
+          <p style="margin: 2px 0;"><strong>PAIEMENT À LA LIVRAISON</strong></p>
+          <p style="margin: 2px 0;">Merci pour votre confiance — Amir Parfume</p>
+        </div>
+      </div>
+    `;
 
     const options = {
         margin: [8, 8, 8, 8],
@@ -691,23 +726,17 @@ const App = {
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    html2pdf().set(options).from(clone).save().then(() => {
-        clone.remove();
-    }).catch(() => {
-        clone.remove();
+    html2pdf().set(options).from(pdfHtml).save().catch(() => {
         showToast('error', 'Erreur lors de la génération du PDF', 'fa-exclamation-triangle');
     });
   },
 
   getStatusBadge(status) {
     const badges = {
-      pending: `<span class="badge badge-warning"><i class="fas fa-clock"></i> Nouvelle</span>`,
-      confirmed: `<span class="badge badge-info" style="background:rgba(52,152,219,0.15);color:#3498db;border:1px solid rgba(52,152,219,0.3)"><i class="fas fa-check"></i> Confirmée</span>`,
-      shipped: `<span class="badge badge-primary" style="background:rgba(155,89,182,0.15);color:#9b59b6;border:1px solid rgba(155,89,182,0.3)"><i class="fas fa-truck"></i> Expédiée</span>`,
-      delivered: `<span class="badge badge-success"><i class="fas fa-check-double"></i> Livrée</span>`,
-      cancelled: `<span class="badge badge-danger"><i class="fas fa-times"></i> Annulée</span>`
+      pending: `<span class="badge badge-warning"><i class="fas fa-clock"></i> En cours</span>`,
+      delivered: `<span class="badge badge-success"><i class="fas fa-check-double"></i> Livrée</span>`
     };
-    return badges[status] || `<span class="badge">${status}</span>`;
+    return badges[status] || `<span class="badge badge-warning"><i class="fas fa-clock"></i> En cours</span>`;
   },
 
   // ---- Settings ---------------------------------------------
@@ -718,9 +747,19 @@ const App = {
     document.getElementById('set-hero-bg').value = settings.heroBackground || '';
 
     const sc = settings.shipping_config || {};
-    document.getElementById('set-free-threshold').value = sc.free_threshold || 15000;
-    document.getElementById('set-home-cost').value = sc.home_delivery_cost || 600;
-    document.getElementById('set-relay-cost').value = sc.relay_delivery_cost || 400;
+    const chkEnabled = document.getElementById('set-enable-shipping');
+    const container = document.getElementById('shipping-costs-container');
+
+    chkEnabled.checked = sc.enabled !== false; // default true
+    container.style.display = chkEnabled.checked ? 'block' : 'none';
+
+    chkEnabled.addEventListener('change', () => {
+        container.style.display = chkEnabled.checked ? 'block' : 'none';
+    });
+
+    document.getElementById('set-free-threshold').value = sc.free_threshold !== undefined ? sc.free_threshold : 15000;
+    document.getElementById('set-home-cost').value = sc.home_delivery_cost !== undefined ? sc.home_delivery_cost : 600;
+    document.getElementById('set-relay-cost').value = sc.relay_delivery_cost !== undefined ? sc.relay_delivery_cost : 400;
 
     const admin = DB.getAdmin();
     document.getElementById('admin-username').value = admin.username;
@@ -733,6 +772,7 @@ const App = {
       store_whatsapp: document.getElementById('set-whatsapp').value,
       heroBackground: document.getElementById('set-hero-bg').value,
       shipping_config: {
+        enabled: document.getElementById('set-enable-shipping').checked,
         free_threshold: parseInt(document.getElementById('set-free-threshold').value) || 15000,
         home_delivery_cost: parseInt(document.getElementById('set-home-cost').value) || 600,
         relay_delivery_cost: parseInt(document.getElementById('set-relay-cost').value) || 400

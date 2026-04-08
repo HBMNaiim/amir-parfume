@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Load Settings
     try {
         const settings = await DB.getSettings();
+        window.storeSettings = settings;
         if (settings && settings.heroBackground) {
             document.querySelector('.hero-bg').style.backgroundImage = `url(${settings.heroBackground})`;
         }
@@ -309,11 +310,15 @@ function closeMobileMenu() {
 
 // ---- Shipping Calculation -----------------------------------
 function getShippingCost() {
+    const sc = window.storeSettings?.shipping_config || {};
+    if (sc.enabled === false) return 0; // Configured to not manage shipping cost
+
     const subtotal = cart.reduce((s, i) => s + (i.promoPrice || i.price) * i.qty, 0);
-    if (subtotal >= 15000) return 0; // Free shipping threshold
+    const threshold = sc.free_threshold !== undefined ? sc.free_threshold : 15000;
+    if (subtotal >= threshold) return 0; // Free shipping threshold
 
     const method = document.querySelector('input[name="deliveryMethod"]:checked')?.value || 'home';
-    return method === 'home' ? 600 : 400;
+    return method === 'home' ? (sc.home_delivery_cost !== undefined ? sc.home_delivery_cost : 600) : (sc.relay_delivery_cost !== undefined ? sc.relay_delivery_cost : 400);
 }
 
 function updateShippingCost() {
@@ -321,9 +326,17 @@ function updateShippingCost() {
     const subtotal = cart.reduce((s, i) => s + (i.promoPrice || i.price) * i.qty, 0);
     const total = subtotal + shipping;
 
+    const sc = window.storeSettings?.shipping_config || {};
+    const hideShipping = sc.enabled === false;
+
+    const shippingRow = document.getElementById('summary-shipping-row');
     const shippingEl = document.getElementById('summary-shipping');
     const subtotalEl = document.getElementById('summary-subtotal');
     const totalEl = document.getElementById('summary-total-amount');
+
+    if (shippingRow) {
+        shippingRow.style.display = hideShipping ? 'none' : 'flex';
+    }
 
     if (subtotalEl) subtotalEl.textContent = formatPrice(subtotal);
     if (shippingEl) {
@@ -738,6 +751,18 @@ function showCheckout() {
       <span class="summary-item-price">${formatPrice((item.promoPrice || item.price) * item.qty)}</span>
     </div>`).join('');
 
+    const sc = window.storeSettings?.shipping_config || {};
+    const noteEl = document.getElementById('checkout-shipping-note');
+    const thresholdEl = document.getElementById('checkout-free-threshold');
+    if (noteEl) {
+        if (sc.enabled === false) {
+            noteEl.style.display = 'none';
+        } else {
+            noteEl.style.display = 'flex';
+            if (thresholdEl) thresholdEl.textContent = formatPrice(sc.free_threshold !== undefined ? sc.free_threshold : 15000);
+        }
+    }
+
     updateShippingCost();
     document.getElementById('checkout').classList.add('visible');
     document.getElementById('checkout').scrollIntoView({ behavior: 'smooth' });
@@ -784,8 +809,12 @@ async function submitOrder(e) {
         const deliveryMethod = document.querySelector('input[name="deliveryMethod"]:checked')?.value || 'home';
         const shippingCost = getShippingCost();
         const subtotal = cart.reduce((s, i) => s + (i.promoPrice || i.price) * i.qty, 0);
+        
+        // Custom order reference
+        const refStr = new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' + Math.floor(1000 + Math.random() * 9000);
 
         const order = {
+            order_number: 'CMD-' + refStr,
             customer: {
                 firstName: form.firstName.value.trim(),
                 lastName: form.lastName.value.trim(),
@@ -806,7 +835,7 @@ async function submitOrder(e) {
         const savedOrder = await DB.saveOrder(order);
 
         // Store for printing
-        lastOrder = { ...order, ...savedOrder, order_number: savedOrder.order_number || savedOrder.id || 'CMD-' + Date.now() };
+        lastOrder = { ...order, ...savedOrder, order_number: order.order_number };
 
         form.reset();
         // Reset commune selector
@@ -841,6 +870,9 @@ function buildConfirmSummary(order) {
     const el = document.getElementById('confirm-summary');
     const deliveryLabel = order.delivery_method === 'relay' ? 'Point relais' : 'Livraison à domicile';
     
+    const sc = window.storeSettings?.shipping_config || {};
+    const hideShipping = sc.enabled === false;
+    
     el.innerHTML = `
     <div class="confirm-summary-section">
       <div class="confirm-summary-row">
@@ -861,10 +893,12 @@ function buildConfirmSummary(order) {
           <span>${formatPrice(i.price * i.qty)}</span>
         </div>
       `).join('')}
+      ${hideShipping ? '' : `
       <div class="confirm-summary-total">
         <span>Livraison</span>
-        <span>${order.shipping_cost === 0 ? 'Gratuite' : formatPrice(order.shipping_cost)}</span>
+        <span>${order.shipping_cost === 0 ? 'Gratuite' : formatPrice(order.shipping_cost || 0)}</span>
       </div>
+      `}
       <div class="confirm-summary-total confirm-grand-total">
         <span>Total</span>
         <span>${formatPrice(order.total)}</span>
