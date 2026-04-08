@@ -654,20 +654,22 @@ const App = {
 
     // Build a pure HTML string for the PDF to isolate it from dark mode CSS
     const pdfHtml = `
-      <div style="padding: 20px 30px; font-family: 'Inter', sans-serif; background: #ffffff; color: #000000;">
-        <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px;">
-          <div>
-            <h2 style="margin: 0; font-size: 24px;">Amir Parfume</h2>
-            <p style="margin: 0; font-size: 14px; color: #555;">امير للعطور</p>
-          </div>
-          <div style="text-align: right;">
-            <p style="margin: 0; font-size: 18px; font-weight: bold;">Bon de Livraison</p>
-            <p style="margin: 0; font-size: 14px;">Réf: ${o.order_number || o.id}</p>
-            <p style="margin: 5px 0 0; font-size: 12px; font-family: monospace;">*${o.order_number || o.id}*</p>
-          </div>
-        </div>
+      <div style="width: 750px; padding: 20px; font-family: 'Inter', sans-serif; background: #ffffff; color: #000000; box-sizing: border-box;">
+        <table style="width: 100%; border-bottom: 2px solid #000; margin-bottom: 20px; border-spacing: 0;">
+          <tr>
+            <td style="text-align: left; vertical-align: top;">
+              <h2 style="margin: 0; font-size: 24px; color: #000;">Amir Parfume</h2>
+              <p style="margin: 0; font-size: 14px; color: #555;">امير للعطور</p>
+            </td>
+            <td style="text-align: right; vertical-align: top;">
+              <p style="margin: 0; font-size: 18px; font-weight: bold; color: #000;">Bon de Livraison</p>
+              <p style="margin: 0; font-size: 14px; color: #000;">Réf: ${o.order_number || o.id}</p>
+              <p style="margin: 5px 0 0; font-size: 12px; font-family: monospace; color: #000;">*${o.order_number || o.id}*</p>
+            </td>
+          </tr>
+        </table>
         
-        <div style="margin-bottom: 20px;">
+        <div style="margin-bottom: 20px; color: #000;">
           <h3 style="font-size: 16px; margin-bottom: 10px; border-bottom: 1px dashed #ccc; padding-bottom: 5px;">Informations Client</h3>
           <p style="margin: 5px 0; font-size: 14px;"><strong>Nom complet:</strong> ${o.customer.firstName} ${o.customer.lastName}</p>
           <p style="margin: 5px 0; font-size: 14px;"><strong>Téléphone:</strong> ${o.customer.phone}</p>
@@ -675,8 +677,8 @@ const App = {
           <p style="margin: 5px 0; font-size: 14px;"><strong>Méthode:</strong> ${o.delivery_method === 'relay' ? 'Retrait en point relais' : 'Livraison à domicile'}</p>
         </div>
 
-        <h3 style="font-size: 16px; margin-bottom: 10px; border-bottom: 1px dashed #ccc; padding-bottom: 5px;">Articles</h3>
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px;">
+        <h3 style="font-size: 16px; margin-bottom: 10px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; color: #000;">Articles</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px; color: #000;">
           <thead>
             <tr style="border-bottom: 1px solid #000;">
               <th style="padding: 8px; text-align: left;">Désignation</th>
@@ -696,23 +698,31 @@ const App = {
           </tbody>
         </table>
 
-        <div style="display: flex; justify-content: flex-end;">
-          <div style="width: 250px;">
-            <div style="display: flex; justify-content: space-between; padding: 5px 0; font-size: 14px;">
-              <span>Sous-total:</span> <strong>${formatPrice(o.subtotal || o.total)}</strong>
-            </div>
-            ${(settings.shipping_config?.enabled === false) ? '' : `
-            <div style="display: flex; justify-content: space-between; padding: 5px 0; font-size: 14px; border-bottom: 1px solid #ccc;">
-              <span>Frais de livraison:</span> <strong>${o.shipping_cost === 0 ? 'Gratuite' : formatPrice(o.shipping_cost || 0)}</strong>
-            </div>`}
-            <div style="display: flex; justify-content: space-between; padding: 10px 0; font-size: 18px; font-weight: bold;">
-              <span>Net à payer:</span> <span>${formatPrice(o.total)}</span>
-            </div>
-          </div>
-        </div>
+        <table style="width: 100%; margin-top: 10px; border-spacing: 0; color: #000;">
+          <tr>
+            <td style="width: 60%;"></td>
+            <td style="width: 40%; vertical-align: top;">
+              <table style="width: 100%; border-spacing: 0; font-size: 14px;">
+                <tr>
+                  <td style="padding: 5px 0; text-align: left;">Sous-total:</td>
+                  <td style="padding: 5px 0; text-align: right; font-weight: bold;">${formatPrice(o.subtotal || o.total)}</td>
+                </tr>
+                ${(settings.shipping_config?.enabled === false) ? '' : `
+                <tr>
+                  <td style="padding: 5px 0; text-align: left; border-bottom: 1px solid #ccc;">Frais de livraison:</td>
+                  <td style="padding: 5px 0; text-align: right; font-weight: bold; border-bottom: 1px solid #ccc;">${o.shipping_cost === 0 ? 'Gratuite' : formatPrice(o.shipping_cost || 0)}</td>
+                </tr>`}
+                <tr>
+                  <td style="padding: 10px 0; text-align: left; font-size: 18px; font-weight: bold;">Net à payer:</td>
+                  <td style="padding: 10px 0; text-align: right; font-size: 18px; font-weight: bold;">${formatPrice(o.total)}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
 
         <div style="margin-top: 50px; text-align: center; font-size: 12px; color: #555;">
-          <p style="margin: 2px 0;"><strong>PAIEMENT À LA LIVRAISON</strong></p>
+          <p style="margin: 2px 0; color: #000; font-weight: bold;">PAIEMENT À LA LIVRAISON</p>
           <p style="margin: 2px 0;">Merci pour votre confiance — Amir Parfume</p>
         </div>
       </div>
