@@ -728,15 +728,23 @@ const App = {
       </div>
     `;
 
+    const tempContainer = document.createElement('div');
+    tempContainer.style.cssText = 'position: fixed; top: 0; left: 0; width: 794px; background: #ffffff; z-index: -9999; overflow: hidden;';
+    tempContainer.innerHTML = pdfHtml;
+    document.body.appendChild(tempContainer);
+
     const options = {
         margin: [8, 8, 8, 8],
         filename: `Bon_Livraison_${o.order_number || o.id}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0, windowWidth: 794 },
+        html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    html2pdf().set(options).from(pdfHtml).save().catch(() => {
+    html2pdf().set(options).from(tempContainer).save().then(() => {
+        tempContainer.remove();
+    }).catch(() => {
+        tempContainer.remove();
         showToast('error', 'Erreur lors de la génération du PDF', 'fa-exclamation-triangle');
     });
   },
